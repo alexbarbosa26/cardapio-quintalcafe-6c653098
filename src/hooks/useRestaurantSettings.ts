@@ -1,5 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
+
+export interface OpeningHours {
+  open: string;
+  close: string;
+  closed: boolean;
+}
+
+export interface WeeklyHours {
+  monday: OpeningHours;
+  tuesday: OpeningHours;
+  wednesday: OpeningHours;
+  thursday: OpeningHours;
+  friday: OpeningHours;
+  saturday: OpeningHours;
+  sunday: OpeningHours;
+  [key: string]: OpeningHours;
+}
 
 export interface RestaurantSettings {
   id: string;
@@ -7,6 +25,12 @@ export interface RestaurantSettings {
   logo_url: string | null;
   primary_color: string;
   secondary_color: string;
+  phone: string | null;
+  address: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  whatsapp: string | null;
+  opening_hours: WeeklyHours | null;
   created_at: string;
   updated_at: string;
 }
@@ -21,7 +45,12 @@ export function useRestaurantSettings() {
         .maybeSingle();
       
       if (error) throw error;
-      return data as RestaurantSettings | null;
+      if (!data) return null;
+      
+      return {
+        ...data,
+        opening_hours: data.opening_hours as unknown as WeeklyHours | null,
+      } as RestaurantSettings;
     },
   });
 }
@@ -31,9 +60,16 @@ export function useUpdateRestaurantSettings() {
   
   return useMutation({
     mutationFn: async (settings: Partial<RestaurantSettings> & { id: string }) => {
+      const { opening_hours, ...rest } = settings;
+      
+      const updateData = {
+        ...rest,
+        ...(opening_hours !== undefined && { opening_hours: opening_hours as unknown as Json }),
+      };
+      
       const { data, error } = await supabase
         .from('restaurant_settings')
-        .update(settings)
+        .update(updateData)
         .eq('id', settings.id)
         .select()
         .single();
