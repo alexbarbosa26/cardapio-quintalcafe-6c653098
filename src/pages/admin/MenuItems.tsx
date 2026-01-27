@@ -66,6 +66,7 @@ export default function MenuItems() {
   const [deletingItem, setDeletingItem] = useState<MenuItemWithCategory | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [filterCategoryId, setFilterCategoryId] = useState<string>('all');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -75,6 +76,11 @@ export default function MenuItems() {
     image_url: '',
     is_active: true,
   });
+
+  // Filter items by category
+  const filteredItems = items?.filter(item => 
+    filterCategoryId === 'all' ? true : item.category_id === filterCategoryId
+  );
 
   const resetForm = () => {
     setFormData({
@@ -180,10 +186,30 @@ export default function MenuItems() {
       />
 
       <div className="flex-1 p-4 md:p-6">
-        <div className="flex justify-between items-center mb-6">
-          <p className="text-muted-foreground">
-            {items?.length || 0} itens cadastrados
-          </p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <p className="text-muted-foreground">
+              {filteredItems?.length || 0} de {items?.length || 0} itens
+            </p>
+            {categories && categories.length > 0 && (
+              <Select
+                value={filterCategoryId}
+                onValueChange={setFilterCategoryId}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filtrar categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas categorias</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
           <Button onClick={openCreateDialog} disabled={!categories?.length}>
             <Plus className="w-4 h-4 mr-2" />
             Adicionar Item
@@ -235,7 +261,7 @@ export default function MenuItems() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {items?.map((item) => (
+                  {filteredItems?.map((item) => (
                     <TableRow
                       key={item.id}
                       className={cn(!item.is_active && 'opacity-50')}

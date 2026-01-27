@@ -5,6 +5,8 @@ import { useRestaurantSettings, WeeklyHours } from '@/hooks/useRestaurantSetting
 import { Loader2, ImageIcon, ChefHat, Phone, MapPin, Clock, Instagram, Facebook } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import defaultLogo from '@/assets/logo.png';
+import { ItemDetailModal } from '@/components/menu/ItemDetailModal';
+import { MenuItem } from '@/types/menu';
 
 const DAY_NAMES: Record<string, string> = {
   monday: 'Segunda',
@@ -29,6 +31,8 @@ export default function PublicMenu() {
   } = useCategories();
   const { data: settings } = useRestaurantSettings();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const navRef = useRef<HTMLDivElement>(null);
   const isLoading = loadingItems || loadingCategories;
@@ -62,6 +66,22 @@ export default function PublicMenu() {
         top,
         behavior: 'smooth'
       });
+    }
+  };
+
+  // Open item detail modal
+  const openItemDetail = (item: MenuItem) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  // Navigate between items in modal
+  const navigateItem = (direction: 'prev' | 'next') => {
+    if (!selectedItem || !items) return;
+    const currentIndex = items.findIndex(i => i.id === selectedItem.id);
+    const newIndex = direction === 'prev' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex >= 0 && newIndex < items.length) {
+      setSelectedItem(items[newIndex]);
     }
   };
 
@@ -135,7 +155,7 @@ export default function PublicMenu() {
           animationDelay: `${catIndex * 100}ms`
         }}>
                 <div className="mb-5">
-                  <h2 className="text-2xl font-display font-bold text-[#c4423b]">
+                  <h2 className="text-2xl font-display font-bold text-[#65221f]">
                     {category.name}
                   </h2>
                   {category.description && <p className="text-muted-foreground mt-1">
@@ -144,25 +164,41 @@ export default function PublicMenu() {
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {category.items.map((item, itemIndex) => <article key={item.id} className="menu-card p-4 flex gap-4 animate-fade-in" style={{
-              animationDelay: `${catIndex * 100 + itemIndex * 50}ms`
-            }}>
-                      {item.image_url ? <img src={item.image_url} alt={item.name} className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover flex-shrink-0" loading="lazy" /> : <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                  {category.items.map((item, itemIndex) => (
+                    <article 
+                      key={item.id} 
+                      className="menu-card p-4 flex gap-4 animate-fade-in cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all" 
+                      style={{ animationDelay: `${catIndex * 100 + itemIndex * 50}ms` }}
+                      onClick={() => openItemDetail(item)}
+                    >
+                      {item.image_url ? (
+                        <img 
+                          src={item.image_url} 
+                          alt={item.name} 
+                          className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover flex-shrink-0" 
+                          loading="lazy" 
+                        />
+                      ) : (
+                        <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
                           <ImageIcon className="w-10 h-10 text-muted-foreground" />
-                        </div>}
+                        </div>
+                      )}
 
                       <div className="flex-1 min-w-0 flex flex-col">
                         <h3 className="font-semibold text-foreground text-lg">
                           {item.name}
                         </h3>
-                        {item.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2 flex-1">
+                        {item.description && (
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2 flex-1">
                             {item.description}
-                          </p>}
+                          </p>
+                        )}
                         <p className="text-xl font-bold mt-2 text-[#65221f]">
                           {formatPrice(item.price)}
                         </p>
                       </div>
-                    </article>)}
+                    </article>
+                  ))}
                 </div>
               </section>)}
           </div>}
@@ -279,5 +315,14 @@ export default function PublicMenu() {
           </svg>
         </a>
       )}
+
+      {/* Item Detail Modal */}
+      <ItemDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        item={selectedItem}
+        items={items || []}
+        onNavigate={navigateItem}
+      />
     </div>;
 }
