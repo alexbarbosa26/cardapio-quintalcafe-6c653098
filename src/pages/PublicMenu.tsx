@@ -150,9 +150,7 @@ export default function PublicMenu() {
 
       {/* Footer */}
       <footer className="border-t border-border mt-12 py-6 text-center">
-        <p className="text-sm text-muted-foreground">
-          Cardápio Digital • Powered by Lovable
-        </p>
+        <p className="text-sm text-muted-foreground">Cardápio Digital • Powered by Quintal Café e Doceria</p>
       </footer>
     </div>;
 }
