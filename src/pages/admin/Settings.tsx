@@ -1,14 +1,35 @@
 import { useState, useEffect } from 'react';
 import { AdminHeader } from '@/components/admin/AdminHeader';
-import { useRestaurantSettings, useUpdateRestaurantSettings, useUploadLogo } from '@/hooks/useRestaurantSettings';
+import { useRestaurantSettings, useUpdateRestaurantSettings, useUploadLogo, WeeklyHours } from '@/hooks/useRestaurantSettings';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Upload, QrCode, Download, ImageIcon } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Loader2, Upload, QrCode, Download, ImageIcon, Phone, MapPin, Instagram, Facebook, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
 import defaultLogo from '@/assets/logo.png';
+
+const DAYS_OF_WEEK = [
+  { key: 'monday', label: 'Segunda-feira' },
+  { key: 'tuesday', label: 'Terça-feira' },
+  { key: 'wednesday', label: 'Quarta-feira' },
+  { key: 'thursday', label: 'Quinta-feira' },
+  { key: 'friday', label: 'Sexta-feira' },
+  { key: 'saturday', label: 'Sábado' },
+  { key: 'sunday', label: 'Domingo' },
+] as const;
+
+const DEFAULT_HOURS: WeeklyHours = {
+  monday: { open: '08:00', close: '18:00', closed: false },
+  tuesday: { open: '08:00', close: '18:00', closed: false },
+  wednesday: { open: '08:00', close: '18:00', closed: false },
+  thursday: { open: '08:00', close: '18:00', closed: false },
+  friday: { open: '08:00', close: '18:00', closed: false },
+  saturday: { open: '08:00', close: '14:00', closed: false },
+  sunday: { open: '', close: '', closed: true },
+};
 
 export default function Settings() {
   const { data: settings, isLoading } = useRestaurantSettings();
@@ -18,6 +39,12 @@ export default function Settings() {
   const [name, setName] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#5a7a5a');
   const [secondaryColor, setSecondaryColor] = useState('#c4423b');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [facebook, setFacebook] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [openingHours, setOpeningHours] = useState<WeeklyHours>(DEFAULT_HOURS);
   
   const publicMenuUrl = `${window.location.origin}/cardapio`;
 
@@ -26,6 +53,12 @@ export default function Settings() {
       setName(settings.name);
       setPrimaryColor(settings.primary_color || '#5a7a5a');
       setSecondaryColor(settings.secondary_color || '#c4423b');
+      setPhone(settings.phone || '');
+      setAddress(settings.address || '');
+      setInstagram(settings.instagram || '');
+      setFacebook(settings.facebook || '');
+      setWhatsapp(settings.whatsapp || '');
+      setOpeningHours(settings.opening_hours || DEFAULT_HOURS);
     }
   }, [settings]);
 
@@ -38,6 +71,12 @@ export default function Settings() {
         name,
         primary_color: primaryColor,
         secondary_color: secondaryColor,
+        phone: phone || null,
+        address: address || null,
+        instagram: instagram || null,
+        facebook: facebook || null,
+        whatsapp: whatsapp || null,
+        opening_hours: openingHours,
       });
       toast.success('Configurações salvas com sucesso!');
     } catch (error) {
@@ -80,6 +119,16 @@ export default function Settings() {
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
 
+  const updateDayHours = (day: keyof WeeklyHours, field: 'open' | 'close' | 'closed', value: string | boolean) => {
+    setOpeningHours(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [field]: value,
+      }
+    }));
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -98,7 +147,7 @@ export default function Settings() {
       />
       
       <main className="flex-1 p-4 md:p-6 space-y-6">
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
           {/* Restaurant Info */}
           <Card>
             <CardHeader>
@@ -182,21 +231,6 @@ export default function Settings() {
                   </div>
                 </div>
               </div>
-
-              <Button 
-                onClick={handleSave} 
-                disabled={updateSettings.isPending}
-                className="w-full"
-              >
-                {updateSettings.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Salvando...
-                  </>
-                ) : (
-                  'Salvar Configurações'
-                )}
-              </Button>
             </CardContent>
           </Card>
 
@@ -249,6 +283,150 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Contact Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Phone className="w-5 h-5" />
+                Informações de Contato
+              </CardTitle>
+              <CardDescription>
+                Adicione formas de contato para seus clientes
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  Telefone
+                </Label>
+                <Input
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="whatsapp" className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  WhatsApp
+                </Label>
+                <Input
+                  id="whatsapp"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="5511999999999 (apenas números com DDD)"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address" className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Endereço
+                </Label>
+                <Input
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Rua Exemplo, 123 - Bairro, Cidade - UF"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="instagram" className="flex items-center gap-2">
+                  <Instagram className="w-4 h-4" />
+                  Instagram
+                </Label>
+                <Input
+                  id="instagram"
+                  value={instagram}
+                  onChange={(e) => setInstagram(e.target.value)}
+                  placeholder="@seurestaurante"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="facebook" className="flex items-center gap-2">
+                  <Facebook className="w-4 h-4" />
+                  Facebook
+                </Label>
+                <Input
+                  id="facebook"
+                  value={facebook}
+                  onChange={(e) => setFacebook(e.target.value)}
+                  placeholder="https://facebook.com/seurestaurante"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Opening Hours */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Horário de Funcionamento
+              </CardTitle>
+              <CardDescription>
+                Configure os horários de abertura e fechamento
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {DAYS_OF_WEEK.map(({ key, label }) => (
+                <div key={key} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                  <div className="w-28 text-sm font-medium">{label}</div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={!openingHours[key].closed}
+                      onCheckedChange={(checked) => updateDayHours(key, 'closed', !checked)}
+                    />
+                    <span className="text-xs text-muted-foreground w-14">
+                      {openingHours[key].closed ? 'Fechado' : 'Aberto'}
+                    </span>
+                  </div>
+                  {!openingHours[key].closed && (
+                    <div className="flex items-center gap-2 flex-1">
+                      <Input
+                        type="time"
+                        value={openingHours[key].open}
+                        onChange={(e) => updateDayHours(key, 'open', e.target.value)}
+                        className="w-24 h-8 text-sm"
+                      />
+                      <span className="text-muted-foreground">às</span>
+                      <Input
+                        type="time"
+                        value={openingHours[key].close}
+                        onChange={(e) => updateDayHours(key, 'close', e.target.value)}
+                        className="w-24 h-8 text-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Save Button */}
+        <div className="flex justify-end">
+          <Button 
+            onClick={handleSave} 
+            disabled={updateSettings.isPending}
+            size="lg"
+            className="min-w-[200px]"
+          >
+            {updateSettings.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              'Salvar Todas as Configurações'
+            )}
+          </Button>
         </div>
       </main>
     </div>

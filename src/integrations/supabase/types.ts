@@ -87,31 +87,49 @@ export type Database = {
       }
       restaurant_settings: {
         Row: {
+          address: string | null
           created_at: string
+          facebook: string | null
           id: string
+          instagram: string | null
           logo_url: string | null
           name: string
+          opening_hours: Json | null
+          phone: string | null
           primary_color: string | null
           secondary_color: string | null
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
+          address?: string | null
           created_at?: string
+          facebook?: string | null
           id?: string
+          instagram?: string | null
           logo_url?: string | null
           name?: string
+          opening_hours?: Json | null
+          phone?: string | null
           primary_color?: string | null
           secondary_color?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
+          address?: string | null
           created_at?: string
+          facebook?: string | null
           id?: string
+          instagram?: string | null
           logo_url?: string | null
           name?: string
+          opening_hours?: Json | null
+          phone?: string | null
           primary_color?: string | null
           secondary_color?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
