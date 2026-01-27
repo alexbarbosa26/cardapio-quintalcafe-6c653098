@@ -17,8 +17,10 @@ import {
   UtensilsCrossed, 
   Eye, 
   LogOut,
-  ChefHat
+  Settings
 } from 'lucide-react';
+import { useRestaurantSettings } from '@/hooks/useRestaurantSettings';
+import defaultLogo from '@/assets/logo.png';
 
 const menuItems = [
   {
@@ -36,11 +38,17 @@ const menuItems = [
     url: '/admin/preview',
     icon: Eye,
   },
+  {
+    title: 'Configurações',
+    url: '/admin/configuracoes',
+    icon: Settings,
+  },
 ];
 
 export function AdminSidebar() {
   const location = useLocation();
   const { signOut, user } = useAuth();
+  const { data: settings } = useRestaurantSettings();
 
   const isActive = (path: string) => {
     if (path === '/admin/categorias' && location.pathname === '/admin') {
@@ -49,16 +57,19 @@ export function AdminSidebar() {
     return location.pathname === path;
   };
 
+  const logoUrl = settings?.logo_url || defaultLogo;
+  const restaurantName = settings?.name || 'Cardápio Digital';
+
   return (
     <Sidebar className="border-r border-sidebar-border">
       <div className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
-            <ChefHat className="w-5 h-5 text-primary-foreground" />
+          <div className="w-10 h-10 rounded-lg overflow-hidden bg-white flex items-center justify-center border border-border">
+            <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h2 className="font-display font-semibold text-sidebar-foreground">
-              Cardápio Digital
+            <h2 className="font-display font-semibold text-sidebar-foreground text-sm">
+              {restaurantName}
             </h2>
             <p className="text-xs text-muted-foreground truncate max-w-[140px]">
               {user?.email}

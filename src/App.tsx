@@ -10,6 +10,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import Categories from "./pages/admin/Categories";
 import MenuItems from "./pages/admin/MenuItems";
 import MenuPreview from "./pages/admin/MenuPreview";
+import Settings from "./pages/admin/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="categorias" element={<Categories />} />
               <Route path="itens" element={<MenuItems />} />
               <Route path="preview" element={<MenuPreview />} />
+              <Route path="configuracoes" element={<Settings />} />
             </Route>
 
             {/* 404 */}

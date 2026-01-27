@@ -1,8 +1,11 @@
 import { useRef, useEffect, useState } from 'react';
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useCategories } from '@/hooks/useCategories';
+import { useRestaurantSettings } from '@/hooks/useRestaurantSettings';
 import { Loader2, ImageIcon, ChefHat } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import defaultLogo from '@/assets/logo.png';
+
 export default function PublicMenu() {
   const {
     data: items,
@@ -12,10 +15,15 @@ export default function PublicMenu() {
     data: categories,
     isLoading: loadingCategories
   } = useCategories();
+  const { data: settings } = useRestaurantSettings();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const navRef = useRef<HTMLDivElement>(null);
   const isLoading = loadingItems || loadingCategories;
+
+  const logoUrl = settings?.logo_url || defaultLogo;
+  const restaurantName = settings?.name || 'Quintal Café e Doceria';
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -77,11 +85,11 @@ export default function PublicMenu() {
       <header className="bg-card border-b border-border sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-center gap-3">
-            <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
-              <ChefHat className="w-5 h-5 text-primary-foreground" />
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-white flex items-center justify-center border border-border">
+              <img src={logoUrl} alt={restaurantName} className="w-full h-full object-contain" />
             </div>
             <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">
-              Cardápio Digital
+              {restaurantName}
             </h1>
           </div>
         </div>
@@ -150,7 +158,7 @@ export default function PublicMenu() {
 
       {/* Footer */}
       <footer className="border-t border-border mt-12 py-6 text-center">
-        <p className="text-sm text-muted-foreground">Cardápio Digital • Powered by Quintal Café e Doceria</p>
+        <p className="text-sm text-muted-foreground">Cardápio Digital • Powered by {restaurantName}</p>
       </footer>
     </div>;
 }
