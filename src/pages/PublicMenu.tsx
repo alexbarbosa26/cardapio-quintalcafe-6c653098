@@ -138,7 +138,7 @@ export default function PublicMenu() {
                         {item.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2 flex-1">
                             {item.description}
                           </p>}
-                        <p className="text-xl font-bold text-menu-price mt-2">
+                        <p className="text-xl font-bold mt-2 text-[#65221f]">
                           {formatPrice(item.price)}
                         </p>
                       </div>
