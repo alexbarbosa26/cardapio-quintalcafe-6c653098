@@ -9,6 +9,7 @@ import { ItemDetailModal } from '@/components/menu/ItemDetailModal';
 import { MenuItem } from '@/types/menu';
 import { OpenStatusBadge } from '@/components/menu/OpenStatusBadge';
 import { MenuSearch } from '@/components/menu/MenuSearch';
+import { PromotionsBanner } from '@/components/menu/PromotionsBanner';
 
 const DAY_NAMES: Record<string, string> = {
   monday: 'Segunda',
@@ -129,6 +130,9 @@ export default function PublicMenu() {
       </div>;
   }
   return <div className="min-h-screen bg-background">
+      {/* Promotions Banner */}
+      <PromotionsBanner />
+
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4">

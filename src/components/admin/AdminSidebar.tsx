@@ -17,7 +17,8 @@ import {
   UtensilsCrossed, 
   Eye, 
   LogOut,
-  Settings
+  Settings,
+  Tag
 } from 'lucide-react';
 import { useRestaurantSettings } from '@/hooks/useRestaurantSettings';
 import defaultLogo from '@/assets/logo.png';
@@ -32,6 +33,11 @@ const menuItems = [
     title: 'Itens do Cardápio',
     url: '/admin/itens',
     icon: UtensilsCrossed,
+  },
+  {
+    title: 'Promoções',
+    url: '/admin/promocoes',
+    icon: Tag,
   },
   {
     title: 'Visualizar Cardápio',
