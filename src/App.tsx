@@ -11,6 +11,7 @@ import Categories from "./pages/admin/Categories";
 import MenuItems from "./pages/admin/MenuItems";
 import MenuPreview from "./pages/admin/MenuPreview";
 import Settings from "./pages/admin/Settings";
+import Promotions from "./pages/admin/Promotions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route index element={<Navigate to="/admin/categorias" replace />} />
               <Route path="categorias" element={<Categories />} />
               <Route path="itens" element={<MenuItems />} />
+              <Route path="promocoes" element={<Promotions />} />
               <Route path="preview" element={<MenuPreview />} />
               <Route path="configuracoes" element={<Settings />} />
             </Route>

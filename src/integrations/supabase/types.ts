@@ -85,6 +85,45 @@ export type Database = {
           },
         ]
       }
+      promotions: {
+        Row: {
+          badge_text: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          start_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          badge_text?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          start_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          badge_text?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          start_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       restaurant_settings: {
         Row: {
           address: string | null
