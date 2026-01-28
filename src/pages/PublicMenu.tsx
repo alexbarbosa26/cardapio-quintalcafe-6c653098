@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useCategories } from '@/hooks/useCategories';
 import { useRestaurantSettings, WeeklyHours } from '@/hooks/useRestaurantSettings';
@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 import defaultLogo from '@/assets/logo.png';
 import { ItemDetailModal } from '@/components/menu/ItemDetailModal';
 import { MenuItem } from '@/types/menu';
+import { OpenStatusBadge } from '@/components/menu/OpenStatusBadge';
+import { MenuSearch } from '@/components/menu/MenuSearch';
 
 const DAY_NAMES: Record<string, string> = {
   monday: 'Segunda',
@@ -33,6 +35,7 @@ export default function PublicMenu() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const navRef = useRef<HTMLDivElement>(null);
   const isLoading = loadingItems || loadingCategories;
@@ -47,13 +50,26 @@ export default function PublicMenu() {
     }).format(price);
   };
 
+  // Filter items by search query
+  const filteredItems = useMemo(() => {
+    if (!items) return [];
+    if (!searchQuery.trim()) return items;
+    const query = searchQuery.toLowerCase().trim();
+    return items.filter(item => 
+      item.name.toLowerCase().includes(query) ||
+      item.description?.toLowerCase().includes(query)
+    );
+  }, [items, searchQuery]);
+
   // Filter categories that have active items
-  const activeCategories = categories?.filter(cat => items?.some(item => item.category_id === cat.id));
+  const activeCategories = categories?.filter(cat => 
+    filteredItems.some(item => item.category_id === cat.id)
+  );
 
   // Group items by category
   const groupedItems = activeCategories?.map(cat => ({
     ...cat,
-    items: items?.filter(item => item.category_id === cat.id) || []
+    items: filteredItems.filter(item => item.category_id === cat.id)
   }));
 
   // Scroll to category
@@ -77,11 +93,11 @@ export default function PublicMenu() {
 
   // Navigate between items in modal
   const navigateItem = (direction: 'prev' | 'next') => {
-    if (!selectedItem || !items) return;
-    const currentIndex = items.findIndex(i => i.id === selectedItem.id);
+    if (!selectedItem || !filteredItems.length) return;
+    const currentIndex = filteredItems.findIndex(i => i.id === selectedItem.id);
     const newIndex = direction === 'prev' ? currentIndex - 1 : currentIndex + 1;
-    if (newIndex >= 0 && newIndex < items.length) {
-      setSelectedItem(items[newIndex]);
+    if (newIndex >= 0 && newIndex < filteredItems.length) {
+      setSelectedItem(filteredItems[newIndex]);
     }
   };
 
@@ -120,10 +136,20 @@ export default function PublicMenu() {
             <div className="w-12 h-12 rounded-full overflow-hidden bg-white flex items-center justify-center border border-border">
               <img src={logoUrl} alt={restaurantName} className="w-full h-full object-contain" />
             </div>
-            <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">
-              {restaurantName}
-            </h1>
+            <div className="text-center">
+              <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">
+                {restaurantName}
+              </h1>
+              <div className="mt-1">
+                <OpenStatusBadge openingHours={settings?.opening_hours || null} />
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Search */}
+        <div className="px-4 pb-3 max-w-md mx-auto">
+          <MenuSearch value={searchQuery} onChange={setSearchQuery} />
         </div>
 
         {/* Category Navigation */}
@@ -321,7 +347,7 @@ export default function PublicMenu() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         item={selectedItem}
-        items={items || []}
+        items={filteredItems}
         onNavigate={navigateItem}
       />
     </div>;

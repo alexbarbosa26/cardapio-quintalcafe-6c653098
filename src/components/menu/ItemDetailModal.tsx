@@ -2,6 +2,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, X, ImageIcon } from 'lucide-react';
 import { MenuItem } from '@/types/menu';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 interface ItemDetailModalProps {
   isOpen: boolean;
@@ -23,6 +24,11 @@ export function ItemDetailModal({
   const currentIndex = items.findIndex(i => i.id === item.id);
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < items.length - 1;
+
+  const swipeHandlers = useSwipeGesture({
+    onSwipeLeft: () => hasNext && onNavigate('next'),
+    onSwipeRight: () => hasPrev && onNavigate('prev'),
+  });
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -66,7 +72,7 @@ export function ItemDetailModal({
           </Button>
         )}
 
-        <div className="flex flex-col">
+        <div className="flex flex-col" {...swipeHandlers}>
           {/* Image */}
           {item.image_url ? (
             <img
