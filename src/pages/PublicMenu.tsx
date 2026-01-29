@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, useMemo } from 'react';
 import { useMenuItems } from '@/hooks/useMenuItems';
 import { useCategories } from '@/hooks/useCategories';
 import { useRestaurantSettings, WeeklyHours } from '@/hooks/useRestaurantSettings';
+import { useAllActivePromotionItems } from '@/hooks/usePromotionItems';
 import { Loader2, ImageIcon, ChefHat, Phone, MapPin, Clock, Instagram, Facebook } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import defaultLogo from '@/assets/logo.png';
@@ -10,6 +11,7 @@ import { MenuItem } from '@/types/menu';
 import { OpenStatusBadge } from '@/components/menu/OpenStatusBadge';
 import { MenuSearch } from '@/components/menu/MenuSearch';
 import { PromotionsBanner } from '@/components/menu/PromotionsBanner';
+import { PromotionBadge } from '@/components/menu/PromotionBadge';
 
 const DAY_NAMES: Record<string, string> = {
   monday: 'Segunda',
@@ -33,6 +35,7 @@ export default function PublicMenu() {
     isLoading: loadingCategories
   } = useCategories();
   const { data: settings } = useRestaurantSettings();
+  const { data: promotionItems } = useAllActivePromotionItems();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,6 +52,14 @@ export default function PublicMenu() {
       style: 'currency',
       currency: 'BRL'
     }).format(price);
+  };
+
+  // Get promotion badge for an item
+  const getItemPromotion = (itemId: string) => {
+    const promoItem = promotionItems?.find(p => p.menu_item_id === itemId);
+    if (!promoItem) return null;
+    const promo = promoItem.promotions as any;
+    return promo?.badge_text || null;
   };
 
   // Filter items by search query
@@ -194,41 +205,50 @@ export default function PublicMenu() {
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {category.items.map((item, itemIndex) => (
-                    <article 
-                      key={item.id} 
-                      className="menu-card p-4 flex gap-4 animate-fade-in cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all" 
-                      style={{ animationDelay: `${catIndex * 100 + itemIndex * 50}ms` }}
-                      onClick={() => openItemDetail(item)}
-                    >
-                      {item.image_url ? (
-                        <img 
-                          src={item.image_url} 
-                          alt={item.name} 
-                          className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover flex-shrink-0" 
-                          loading="lazy" 
-                        />
-                      ) : (
-                        <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
-                          <ImageIcon className="w-10 h-10 text-muted-foreground" />
-                        </div>
-                      )}
-
-                      <div className="flex-1 min-w-0 flex flex-col">
-                        <h3 className="font-semibold text-foreground text-lg">
-                          {item.name}
-                        </h3>
-                        {item.description && (
-                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2 flex-1">
-                            {item.description}
-                          </p>
+                  {category.items.map((item, itemIndex) => {
+                    const promoBadge = getItemPromotion(item.id);
+                    return (
+                      <article 
+                        key={item.id} 
+                        className="menu-card p-4 flex gap-4 animate-fade-in cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all relative" 
+                        style={{ animationDelay: `${catIndex * 100 + itemIndex * 50}ms` }}
+                        onClick={() => openItemDetail(item)}
+                      >
+                        {promoBadge && (
+                          <div className="absolute -top-2 -right-2 z-10">
+                            <PromotionBadge text={promoBadge} />
+                          </div>
                         )}
-                        <p className="text-xl font-bold mt-2 text-[#65221f]">
-                          {formatPrice(item.price)}
-                        </p>
-                      </div>
-                    </article>
-                  ))}
+                        
+                        {item.image_url ? (
+                          <img 
+                            src={item.image_url} 
+                            alt={item.name} 
+                            className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover flex-shrink-0" 
+                            loading="lazy" 
+                          />
+                        ) : (
+                          <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                            <ImageIcon className="w-10 h-10 text-muted-foreground" />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0 flex flex-col">
+                          <h3 className="font-semibold text-foreground text-lg">
+                            {item.name}
+                          </h3>
+                          {item.description && (
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2 flex-1">
+                              {item.description}
+                            </p>
+                          )}
+                          <p className="text-xl font-bold mt-2 text-[#65221f]">
+                            {formatPrice(item.price)}
+                          </p>
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
               </section>)}
           </div>}
