@@ -103,6 +103,10 @@ export default {
   				price: 'hsl(var(--menu-price))',
   				inactive: 'hsl(var(--menu-inactive))',
   				category: 'hsl(var(--menu-category))'
+  			},
+  			promotion: {
+  				DEFAULT: 'hsl(var(--promotion))',
+  				foreground: 'hsl(var(--promotion-foreground))'
   			}
   		},
   		borderRadius: {

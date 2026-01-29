@@ -54,6 +54,10 @@
 
     --radius: 0.75rem;
 
+    /* Promotion badge - Warm yellow */
+    --promotion: 45 93% 47%;
+    --promotion-foreground: 45 93% 12%;
+
     /* Custom restaurant colors */
     --menu-header: 20 14% 12%;
     --menu-price: 25 95% 53%;
@@ -131,6 +135,10 @@
     --menu-price: 25 95% 55%;
     --menu-inactive: 30 10% 50%;
     --menu-category: 15 70% 50%;
+
+    /* Promotion badge - Warm yellow (dark) */
+    --promotion: 45 93% 55%;
+    --promotion-foreground: 45 93% 12%;
 
     --sidebar-background: 20 12% 10%;
     --sidebar-foreground: 0 0% 98%;
