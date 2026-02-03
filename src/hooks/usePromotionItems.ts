@@ -6,7 +6,20 @@ export interface PromotionItem {
   id: string;
   promotion_id: string;
   menu_item_id: string;
+  discount_type: string | null;
+  discount_value: number | null;
   created_at: string;
+}
+
+export interface PromotionItemWithPromo extends PromotionItem {
+  promotions: {
+    id: string;
+    title: string;
+    badge_text: string | null;
+    is_active: boolean;
+    start_date: string | null;
+    end_date: string | null;
+  } | null;
 }
 
 export function usePromotionItems(promotionId?: string) {
@@ -57,13 +70,18 @@ export function useItemPromotions(menuItemId?: string) {
 export function useAllActivePromotionItems() {
   return useQuery({
     queryKey: ['all-active-promotion-items'],
-    queryFn: async () => {
+    queryFn: async (): Promise<PromotionItemWithPromo[]> => {
       const today = new Date().toISOString().split('T')[0];
       
       const { data, error } = await supabase
         .from('promotion_items')
         .select(`
+          id,
+          promotion_id,
           menu_item_id,
+          discount_type,
+          discount_value,
+          created_at,
           promotions:promotion_id (
             id,
             title,
@@ -77,8 +95,8 @@ export function useAllActivePromotionItems() {
       if (error) throw error;
       
       // Filter to only active promotions within date range
-      return data.filter(item => {
-        const promo = item.promotions as any;
+      return (data as PromotionItemWithPromo[]).filter(item => {
+        const promo = item.promotions;
         if (!promo?.is_active) return false;
         if (promo.start_date && promo.start_date > today) return false;
         if (promo.end_date && promo.end_date < today) return false;
@@ -92,10 +110,25 @@ export function useLinkPromotionItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ promotionId, menuItemId }: { promotionId: string; menuItemId: string }) => {
+    mutationFn: async ({ 
+      promotionId, 
+      menuItemId,
+      discountType,
+      discountValue 
+    }: { 
+      promotionId: string; 
+      menuItemId: string;
+      discountType?: string;
+      discountValue?: number;
+    }) => {
       const { data, error } = await supabase
         .from('promotion_items')
-        .insert({ promotion_id: promotionId, menu_item_id: menuItemId })
+        .insert({ 
+          promotion_id: promotionId, 
+          menu_item_id: menuItemId,
+          discount_type: discountType || null,
+          discount_value: discountValue || null
+        })
         .select()
         .single();
 
@@ -109,6 +142,46 @@ export function useLinkPromotionItem() {
     onError: (error) => {
       toast({
         title: 'Erro ao vincular item',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+export function useUpdatePromotionItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      id,
+      discountType,
+      discountValue 
+    }: { 
+      id: string;
+      discountType?: string | null;
+      discountValue?: number | null;
+    }) => {
+      const { data, error } = await supabase
+        .from('promotion_items')
+        .update({ 
+          discount_type: discountType,
+          discount_value: discountValue
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['promotion-items'] });
+      queryClient.invalidateQueries({ queryKey: ['all-active-promotion-items'] });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Erro ao atualizar desconto',
         description: error.message,
         variant: 'destructive',
       });

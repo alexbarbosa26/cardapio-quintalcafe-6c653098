@@ -181,7 +181,7 @@
 
 @layer components {
   .menu-card {
-    @apply bg-card rounded-xl shadow-soft border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-medium hover:-translate-y-1;
+    @apply bg-card rounded-xl shadow-soft border border-border/50 transition-all duration-300 hover:shadow-medium hover:-translate-y-1;
   }
 
   .category-chip {
