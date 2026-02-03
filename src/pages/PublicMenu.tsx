@@ -54,12 +54,28 @@ export default function PublicMenu() {
     }).format(price);
   };
 
-  // Get promotion badge for an item
+  // Get promotion info for an item (badge and discount)
   const getItemPromotion = (itemId: string) => {
     const promoItem = promotionItems?.find(p => p.menu_item_id === itemId);
     if (!promoItem) return null;
-    const promo = promoItem.promotions as any;
-    return promo?.badge_text || null;
+    const promo = promoItem.promotions;
+    return {
+      badgeText: promo?.badge_text || null,
+      discountType: promoItem.discount_type,
+      discountValue: promoItem.discount_value,
+    };
+  };
+
+  // Calculate discounted price
+  const getDiscountedPrice = (originalPrice: number, discountType: string | null, discountValue: number | null): number | null => {
+    if (!discountType || !discountValue || discountValue <= 0) return null;
+    
+    if (discountType === 'percentage') {
+      return originalPrice * (1 - discountValue / 100);
+    } else if (discountType === 'fixed') {
+      return Math.max(0, originalPrice - discountValue);
+    }
+    return null;
   };
 
   // Filter items by search query
@@ -206,17 +222,21 @@ export default function PublicMenu() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   {category.items.map((item, itemIndex) => {
-                    const promoBadge = getItemPromotion(item.id);
+                    const promoInfo = getItemPromotion(item.id);
+                    const discountedPrice = promoInfo 
+                      ? getDiscountedPrice(item.price, promoInfo.discountType, promoInfo.discountValue)
+                      : null;
+                    
                     return (
                       <article 
                         key={item.id} 
-                        className="menu-card p-4 flex gap-4 animate-fade-in cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all relative" 
+                        className="menu-card p-4 flex gap-4 animate-fade-in cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all relative overflow-visible" 
                         style={{ animationDelay: `${catIndex * 100 + itemIndex * 50}ms` }}
                         onClick={() => openItemDetail(item)}
                       >
-                        {promoBadge && (
+                        {promoInfo?.badgeText && (
                           <div className="absolute -top-2 -right-2 z-10">
-                            <PromotionBadge text={promoBadge} />
+                            <PromotionBadge text={promoInfo.badgeText} />
                           </div>
                         )}
                         
@@ -242,9 +262,22 @@ export default function PublicMenu() {
                               {item.description}
                             </p>
                           )}
-                          <p className="text-xl font-bold mt-2 text-[#65221f]">
-                            {formatPrice(item.price)}
-                          </p>
+                          <div className="mt-2 flex items-center gap-2">
+                            {discountedPrice !== null ? (
+                              <>
+                                <span className="text-xl font-bold text-promotion">
+                                  {formatPrice(discountedPrice)}
+                                </span>
+                                <span className="text-sm text-muted-foreground line-through">
+                                  {formatPrice(item.price)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-xl font-bold text-[#65221f]">
+                                {formatPrice(item.price)}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </article>
                     );

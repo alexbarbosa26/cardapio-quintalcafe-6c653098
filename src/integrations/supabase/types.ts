@@ -85,21 +85,62 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          promotion_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          promotion_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          promotion_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       promotion_items: {
         Row: {
           created_at: string
+          discount_type: string | null
+          discount_value: number | null
           id: string
           menu_item_id: string
           promotion_id: string
         }
         Insert: {
           created_at?: string
+          discount_type?: string | null
+          discount_value?: number | null
           id?: string
           menu_item_id: string
           promotion_id: string
         }
         Update: {
           created_at?: string
+          discount_type?: string | null
+          discount_value?: number | null
           id?: string
           menu_item_id?: string
           promotion_id?: string
@@ -114,6 +155,38 @@ export type Database = {
           },
           {
             foreignKeyName: "promotion_items_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promotion_views: {
+        Row: {
+          id: string
+          ip_hash: string | null
+          promotion_id: string
+          user_agent: string | null
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          ip_hash?: string | null
+          promotion_id: string
+          user_agent?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          ip_hash?: string | null
+          promotion_id?: string
+          user_agent?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_views_promotion_id_fkey"
             columns: ["promotion_id"]
             isOneToOne: false
             referencedRelation: "promotions"
@@ -156,6 +229,33 @@ export type Database = {
           is_active?: boolean
           start_date?: string | null
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          updated_at: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          updated_at?: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
           updated_at?: string
         }
         Relationships: []

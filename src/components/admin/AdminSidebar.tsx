@@ -18,7 +18,8 @@ import {
   Eye, 
   LogOut,
   Settings,
-  Tag
+  Tag,
+  BarChart3
 } from 'lucide-react';
 import { useRestaurantSettings } from '@/hooks/useRestaurantSettings';
 import defaultLogo from '@/assets/logo.png';
@@ -38,6 +39,11 @@ const menuItems = [
     title: 'Promoções',
     url: '/admin/promocoes',
     icon: Tag,
+  },
+  {
+    title: 'Relatórios',
+    url: '/admin/promocoes/relatorios',
+    icon: BarChart3,
   },
   {
     title: 'Visualizar Cardápio',
