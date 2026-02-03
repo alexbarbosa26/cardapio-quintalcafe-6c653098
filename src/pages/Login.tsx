@@ -126,16 +126,6 @@ export default function Login() {
             </button>
           </div>
 
-          {/* Demo credentials hint */}
-          <div className="mt-6 p-3 rounded-lg bg-muted text-center">
-            <p className="text-xs text-muted-foreground">
-              <strong>Credenciais de teste:</strong><br />
-              admin@gmail.com / admin<br />
-              demo@gmail.com / demo
-            </p>
-          </div>
-        </div>
-
         {/* Link to public menu */}
         <p className="text-center mt-6 text-sm text-muted-foreground">
           <a href="/cardapio" className="hover:text-primary transition-colors">
