@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { usePromotions, useCreatePromotion, useUpdatePromotion, useDeletePromotion } from '@/hooks/usePromotions';
-import { usePromotionItems, useLinkPromotionItem, useUnlinkPromotionItem } from '@/hooks/usePromotionItems';
+import { usePromotionItems, useLinkPromotionItem, useUnlinkPromotionItem, useUpdatePromotionItem } from '@/hooks/usePromotionItems';
 import { useMenuItems, useUploadImage } from '@/hooks/useMenuItems';
 import { Promotion } from '@/types/promotion';
 import { Plus, Pencil, Trash2, Loader2, Tag, Upload, X, ImageIcon, Link2 } from 'lucide-react';
@@ -50,6 +50,7 @@ export default function Promotions() {
   const uploadImage = useUploadImage();
   const linkItem = useLinkPromotionItem();
   const unlinkItem = useUnlinkPromotionItem();
+  const updatePromotionItem = useUpdatePromotionItem();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -61,7 +62,11 @@ export default function Promotions() {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  const { data: linkedItems } = usePromotionItems(linkingPromotion?.id);
+  const { data: linkedItems, refetch: refetchLinkedItems } = usePromotionItems(linkingPromotion?.id);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
+  };
 
   const [formData, setFormData] = useState({
     title: '',
@@ -192,8 +197,14 @@ export default function Promotions() {
       await linkItem.mutateAsync({
         promotionId: linkingPromotion.id,
         menuItemId,
+        discountType: 'percentage',
+        discountValue: 0,
       });
     }
+  };
+
+  const handleUpdateDiscount = async (itemId: string, discountType: string, discountValue: number) => {
+    await updatePromotionItem.mutateAsync({ id: itemId, discountType, discountValue });
   };
 
   const getCountdownText = (endDate: string) => {
@@ -509,45 +520,97 @@ export default function Promotions() {
 
       {/* Link Items Dialog */}
       <Dialog open={isItemsDialogOpen} onOpenChange={setIsItemsDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Vincular Itens</DialogTitle>
+            <DialogTitle>Vincular Itens à Promoção</DialogTitle>
             <DialogDescription>
-              Selecione os itens que farão parte da promoção "{linkingPromotion?.title}"
+              Selecione os itens e defina o desconto para "{linkingPromotion?.title}"
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="h-[300px] pr-4">
-            <div className="space-y-2">
+          <ScrollArea className="h-[400px] pr-4">
+            <div className="space-y-3">
               {menuItems?.filter(item => item.is_active).map((item) => {
                 const isLinked = linkedItemIds.includes(item.id);
+                const linkedItem = linkedItems?.find(li => li.menu_item_id === item.id);
                 return (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer"
-                    onClick={() => handleToggleItem(item.id, isLinked)}
+                    className={cn(
+                      "p-3 rounded-lg border transition-colors",
+                      isLinked ? "border-primary/40 bg-primary/5" : "border-border hover:bg-muted"
+                    )}
                   >
-                    <Checkbox
-                      checked={isLinked}
-                      onCheckedChange={() => handleToggleItem(item.id, isLinked)}
-                    />
-                    {item.image_url ? (
-                      <img
-                        src={item.image_url}
-                        alt={item.name}
-                        className="w-10 h-10 rounded-lg object-cover"
+                    <div
+                      className="flex items-center gap-3 cursor-pointer"
+                      onClick={() => handleToggleItem(item.id, isLinked)}
+                    >
+                      <Checkbox
+                        checked={isLinked}
+                        onCheckedChange={() => handleToggleItem(item.id, isLinked)}
                       />
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                        <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-10 h-10 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                          <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{item.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.categories?.name} • {formatPrice(item.price)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {isLinked && linkedItem && (
+                      <div className="mt-3 ml-8 flex items-center gap-2">
+                        <select
+                          className="text-xs border rounded px-2 py-1.5 bg-background"
+                          value={linkedItem.discount_type || 'percentage'}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            handleUpdateDiscount(
+                              linkedItem.id,
+                              e.target.value,
+                              linkedItem.discount_value || 0
+                            );
+                          }}
+                        >
+                          <option value="percentage">% Desconto</option>
+                          <option value="fixed">R$ Desconto</option>
+                        </select>
+                        <Input
+                          type="number"
+                          min={0}
+                          step={linkedItem.discount_type === 'percentage' ? 1 : 0.01}
+                          className="w-24 h-8 text-xs"
+                          placeholder="Valor"
+                          value={linkedItem.discount_value || ''}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            handleUpdateDiscount(
+                              linkedItem.id,
+                              linkedItem.discount_type || 'percentage',
+                              parseFloat(e.target.value) || 0
+                            );
+                          }}
+                        />
+                        {linkedItem.discount_value && linkedItem.discount_value > 0 && (
+                          <span className="text-xs text-promotion font-medium whitespace-nowrap">
+                            {linkedItem.discount_type === 'percentage'
+                              ? `${formatPrice(item.price * (1 - (linkedItem.discount_value / 100)))}`
+                              : `${formatPrice(Math.max(0, item.price - linkedItem.discount_value))}`
+                            }
+                          </span>
+                        )}
                       </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.categories?.name}
-                      </p>
-                    </div>
                   </div>
                 );
               })}
