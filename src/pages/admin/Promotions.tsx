@@ -296,6 +296,11 @@ export default function Promotions() {
                       <TableCell>
                         <div>
                           <p className="font-medium">{promotion.title}</p>
+                          {promotion.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {promotion.description}
+                            </p>
+                          )}
                           {promotion.end_date && (
                             <p className="text-xs text-muted-foreground">
                               {getCountdownText(promotion.end_date)}
