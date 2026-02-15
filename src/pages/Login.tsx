@@ -53,7 +53,7 @@ export default function Login() {
               <UtensilsCrossed className="w-8 h-8 text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-display font-bold text-foreground">
-              Cardápio Digital
+              Quintal Café e Doceria
             </h1>
             <p className="text-muted-foreground mt-2">
               {isSignUp ? 'Crie sua conta' : 'Acesse o painel administrativo'}
@@ -132,6 +132,7 @@ export default function Login() {
             Ver cardápio público →
           </a>
         </p>
+        </div>
       </div>
     </div>
   );
