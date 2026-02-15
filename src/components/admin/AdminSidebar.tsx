@@ -70,7 +70,7 @@ export function AdminSidebar() {
   };
 
   const logoUrl = settings?.logo_url || defaultLogo;
-  const restaurantName = settings?.name || 'Cardápio Digital';
+  const restaurantName = settings?.name || 'Quintal Café e Doceria';
 
   return (
     <Sidebar className="border-r border-sidebar-border">
