@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Login from "./pages/Login";
 import PublicMenu from "./pages/PublicMenu";
+import Install from "./pages/Install";
 import AdminLayout from "./layouts/AdminLayout";
 import Categories from "./pages/admin/Categories";
 import MenuItems from "./pages/admin/MenuItems";
@@ -28,6 +29,7 @@ const App = () => (
             {/* Public Routes */}
             <Route path="/" element={<Navigate to="/cardapio" replace />} />
             <Route path="/cardapio" element={<PublicMenu />} />
+            <Route path="/install" element={<Install />} />
             <Route path="/login" element={<Login />} />
 
             {/* Admin Routes */}
