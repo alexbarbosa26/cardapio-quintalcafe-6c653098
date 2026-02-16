@@ -8,12 +8,11 @@ import { UtensilsCrossed, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSignUp, setIsSignUp] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,15 +20,11 @@ export default function Login() {
     setError(null);
 
     try {
-      const { error } = isSignUp 
-        ? await signUp(email, password)
-        : await signIn(email, password);
+      const { error } = await signIn(email, password);
 
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           setError('E-mail ou senha inválidos');
-        } else if (error.message.includes('User already registered')) {
-          setError('Este e-mail já está cadastrado');
         } else {
           setError(error.message);
         }
@@ -56,7 +51,7 @@ export default function Login() {
               Quintal Café e Doceria
             </h1>
             <p className="text-muted-foreground mt-2">
-              {isSignUp ? 'Crie sua conta' : 'Acesse o painel administrativo'}
+              Acesse o painel administrativo
             </p>
           </div>
 
@@ -102,29 +97,11 @@ export default function Login() {
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
-              ) : isSignUp ? (
-                'Criar conta'
               ) : (
                 'Entrar'
               )}
             </Button>
           </form>
-
-          {/* Toggle sign up/sign in */}
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setError(null);
-              }}
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              {isSignUp
-                ? 'Já tem uma conta? Faça login'
-                : 'Não tem conta? Cadastre-se'}
-            </button>
-          </div>
 
         {/* Link to public menu */}
         <p className="text-center mt-6 text-sm text-muted-foreground">

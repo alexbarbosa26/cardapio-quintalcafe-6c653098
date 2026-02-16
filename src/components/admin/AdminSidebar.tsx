@@ -19,7 +19,8 @@ import {
   LogOut,
   Settings,
   Tag,
-  BarChart3
+  BarChart3,
+  Users
 } from 'lucide-react';
 import { useRestaurantSettings } from '@/hooks/useRestaurantSettings';
 import defaultLogo from '@/assets/logo.png';
@@ -49,6 +50,11 @@ const menuItems = [
     title: 'Visualizar Cardápio',
     url: '/admin/preview',
     icon: Eye,
+  },
+  {
+    title: 'Usuários',
+    url: '/admin/usuarios',
+    icon: Users,
   },
   {
     title: 'Configurações',
