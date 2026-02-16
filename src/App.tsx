@@ -14,6 +14,7 @@ import MenuPreview from "./pages/admin/MenuPreview";
 import Settings from "./pages/admin/Settings";
 import Promotions from "./pages/admin/Promotions";
 import PromotionReports from "./pages/admin/PromotionReports";
+import Users from "./pages/admin/Users";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="promocoes/relatorios" element={<PromotionReports />} />
               <Route path="preview" element={<MenuPreview />} />
               <Route path="configuracoes" element={<Settings />} />
+              <Route path="usuarios" element={<Users />} />
             </Route>
 
             {/* 404 */}
